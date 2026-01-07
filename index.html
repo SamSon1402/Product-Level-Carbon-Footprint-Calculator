@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCG X - Product Carbon Footprint Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bcg-green: #00A86B;
+            --bcg-green-dark: #008F5B;
+            --bcg-green-light: #00C77B;
+            --bcg-navy: #1B365D;
+            --bcg-navy-light: #2A4A7A;
+            --accent-yellow: #F2C94C;
+            --accent-orange: #F2994A;
+            --accent-red: #EB5757;
+            --bg-dark: #0D1117;
+            --bg-card: #161B22;
+            --bg-elevated: #21262D;
+            --text-primary: #F0F6FC;
+            --text-secondary: #8B949E;
+            --text-muted: #6E7681;
+            --border: #30363D;
+            --gradient-main: linear-gradient(135deg, #00A86B 0%, #00C77B 50%, #1B365D 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 168, 107, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(27, 54, 93, 0.08) 0%, transparent 50%);
+        }
+
+        .header {
+            background: rgba(22, 27, 34, 0.95);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .header-content {
+            max-width: 1800px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--gradient-main);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 20px rgba(0, 168, 107, 0.3);
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .header-badges {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .badge.active {
+            background: rgba(0, 168, 107, 0.15);
+            border-color: var(--bcg-green);
+            color: var(--bcg-green);
+        }
+
+        .main {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 1.5rem 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 1rem 0 1.5rem;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Product Selection */
+        .product-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 1000px) {
+            .product-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .product-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .product-card:hover {
+            border-color: var(--bcg-green);
+            transform: translateY(-2px);
+        }
+
+        .product-card.selected {
+            border-color: var(--bcg-green);
+            background: rgba(0, 168, 107, 0.1);
+            box-shadow: 0 0 25px rgba(0, 168, 107, 0.2);
+        }
+
+        .product-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .product-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .product-category {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Dashboard */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body { padding: 1.25rem; }
+
+        /* Scope Breakdown */
+        .scope-breakdown {
+            margin-bottom: 1.5rem;
+        }
+
+        .scope-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .scope-card {
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            border-left: 4px solid var(--bcg-green);
+        }
+
+        .scope-card.scope1 { border-left-color: var(--bcg-green); }
+        .scope-card.scope2 { border-left-color: var(--accent-yellow); }
+        .scope-card.scope3 { border-left-color: var(--accent-orange); }
+
+        .scope-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.25rem;
+        }
+
+        .scope-card.scope1 .scope-value { color: var(--bcg-green); }
+        .scope-card.scope2 .scope-value { color: var(--accent-yellow); }
+        .scope-card.scope3 .scope-value { color: var(--accent-orange); }
+
+        .scope-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .scope-detail {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* Emissions Chart */
+        .chart-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-label {
+            width: 120px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-elevated);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: width 0.8s ease;
+        }
+
+        .bar-fill.materials { background: linear-gradient(90deg, #00A86B, #00C77B); }
+        .bar-fill.manufacturing { background: linear-gradient(90deg, #F2C94C, #F2994A); }
+        .bar-fill.transport { background: linear-gradient(90deg, #EB5757, #F2994A); }
+        .bar-fill.packaging { background: linear-gradient(90deg, #6366F1, #8B5CF6); }
+        .bar-fill.eol { background: linear-gradient(90deg, #6E7681, #8B949E); }
+
+        .bar-value {
+            width: 80px;
+            text-align: right;
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-primary);
+        }
+
+        /* Hotspot Analysis */
+        .hotspot-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .hotspot-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .hotspot-item {
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .hotspot-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: var(--accent-orange);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .hotspot-rank.critical { background: var(--accent-red); }
+        .hotspot-rank.high { background: var(--accent-orange); }
+        .hotspot-rank.medium { background: var(--accent-yellow); color: #000; }
+
+        .hotspot-content { flex: 1; }
+
+        .hotspot-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.15rem;
+        }
+
+        .hotspot-detail {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .hotspot-impact {
+            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-orange);
+        }
+
+        /* BOM Table */
+        .bom-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .bom-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .bom-table th,
+        .bom-table td {
+            padding: 0.6rem 0.75rem;
+            text-align: left;
+            font-size: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .bom-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+        }
+
+        .bom-table td {
+            color: var(--text-secondary);
+        }
+
+        .bom-table .emission {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--bcg-green);
+        }
+
+        .bom-table .ef {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            font-size: 0.65rem;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Total Footprint */
+        .footprint-card {
+            background: linear-gradient(135deg, rgba(0, 168, 107, 0.15) 0%, rgba(27, 54, 93, 0.15) 100%);
+            border: 1px solid var(--bcg-green);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .footprint-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footprint-unit {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .footprint-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .footprint-benchmark {
+            font-size: 0.7rem;
+            color: var(--bcg-green);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Reduction Recommendations */
+        .recommendation-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .rec-item {
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            padding: 0.75rem;
+            border-left: 3px solid var(--bcg-green);
+        }
+
+        .rec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.4rem;
+        }
+
+        .rec-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .rec-savings {
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--bcg-green);
+        }
+
+        .rec-detail {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* Supplier Match */
+        .supplier-section {
+            margin-bottom: 1rem;
+        }
+
+        .supplier-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .supplier-item:last-child { border-bottom: none; }
+
+        .supplier-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--bg-elevated);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .supplier-info { flex: 1; }
+
+        .supplier-name {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .supplier-match {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .supplier-conf {
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--bcg-green);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-main);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 25px rgba(0, 168, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-dark);
+            border-color: var(--bcg-green);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        .btn-full { grid-column: 1 / -1; }
+
+        /* Processing Log */
+        .log-panel {
+            background: var(--bg-dark);
+            border-radius: 8px;
+            padding: 0.75rem;
+            height: 150px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+        }
+
+        .log-entry {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .log-time { color: var(--text-muted); flex-shrink: 0; }
+        .log-message { color: var(--text-secondary); }
+        .log-message.success { color: var(--bcg-green); }
+        .log-message.info { color: var(--accent-yellow); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🌱</div>
+                <div>
+                    <div class="logo-text">BCG X | CO2 AI</div>
+                    <div class="logo-subtitle">Carbon Footprint Calculator</div>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge active">● RAG-Powered</span>
+                <span class="badge">110K+ Emission Factors</span>
+                <span class="badge">Scope 1-2-3</span>
+                <span class="badge">GHG Protocol</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="hero">
+            <h1>🌍 Product-Level Carbon Footprint Calculator</h1>
+            <p>AI-powered emissions measurement using RAG to match activity data with emission factors at scale</p>
+        </div>
+
+        <!-- Product Selection -->
+        <div class="product-section">
+            <div class="section-title">📦 Select Product to Analyze</div>
+            <div class="product-grid">
+                <div class="product-card selected" onclick="selectProduct('bottle')">
+                    <div class="product-icon">🍾</div>
+                    <div class="product-name">Wine Bottle (750ml)</div>
+                    <div class="product-category">Food & Beverage • Glass</div>
+                </div>
+                <div class="product-card" onclick="selectProduct('tshirt')">
+                    <div class="product-icon">👕</div>
+                    <div class="product-name">Cotton T-Shirt</div>
+                    <div class="product-category">Apparel • Textile</div>
+                </div>
+                <div class="product-card" onclick="selectProduct('laptop')">
+                    <div class="product-icon">💻</div>
+                    <div class="product-name">Laptop Computer</div>
+                    <div class="product-category">Electronics • Assembly</div>
+                </div>
+                <div class="product-card" onclick="selectProduct('yogurt')">
+                    <div class="product-icon">🥛</div>
+                    <div class="product-name">Yogurt Cup (150g)</div>
+                    <div class="product-category">Dairy • Plastic</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="dashboard">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">📊 Emissions Breakdown</h3>
+                    <span style="font-size: 0.75rem; color: var(--bcg-green);">● Calculated</span>
+                </div>
+                <div class="card-body">
+                    <!-- Scope Breakdown -->
+                    <div class="scope-breakdown">
+                        <div class="scope-cards">
+                            <div class="scope-card scope1">
+                                <div class="scope-value" id="scope1Value">0.08</div>
+                                <div class="scope-label">Scope 1</div>
+                                <div class="scope-detail">Direct emissions</div>
+                            </div>
+                            <div class="scope-card scope2">
+                                <div class="scope-value" id="scope2Value">0.12</div>
+                                <div class="scope-label">Scope 2</div>
+                                <div class="scope-detail">Energy (market-based)</div>
+                            </div>
+                            <div class="scope-card scope3">
+                                <div class="scope-value" id="scope3Value">0.62</div>
+                                <div class="scope-label">Scope 3</div>
+                                <div class="scope-detail">Value chain</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Emissions by Category -->
+                    <div class="chart-container">
+                        <div class="section-title">🔥 Emissions by Category (kg CO₂e)</div>
+                        <div class="bar-chart">
+                            <div class="bar-item">
+                                <div class="bar-label">Raw Materials</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill materials" style="width: 45%;">45%</div>
+                                </div>
+                                <div class="bar-value">0.37</div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar-label">Manufacturing</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill manufacturing" style="width: 25%;">25%</div>
+                                </div>
+                                <div class="bar-value">0.21</div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar-label">Transportation</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill transport" style="width: 18%;">18%</div>
+                                </div>
+                                <div class="bar-value">0.15</div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar-label">Packaging</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill packaging" style="width: 8%;">8%</div>
+                                </div>
+                                <div class="bar-value">0.07</div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar-label">End of Life</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill eol" style="width: 4%;">4%</div>
+                                </div>
+                                <div class="bar-value">0.02</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hotspot Analysis -->
+                    <div class="hotspot-section">
+                        <div class="section-title">🎯 Emission Hotspots</div>
+                        <div class="hotspot-list">
+                            <div class="hotspot-item">
+                                <div class="hotspot-rank critical">1</div>
+                                <div class="hotspot-content">
+                                    <div class="hotspot-title">Glass Production (Soda-Lime)</div>
+                                    <div class="hotspot-detail">High-temperature furnace • Natural gas combustion</div>
+                                </div>
+                                <div class="hotspot-impact">0.28 kg</div>
+                            </div>
+                            <div class="hotspot-item">
+                                <div class="hotspot-rank high">2</div>
+                                <div class="hotspot-content">
+                                    <div class="hotspot-title">Inbound Logistics (Sea Freight)</div>
+                                    <div class="hotspot-detail">Shanghai → Marseille • 18,500 km</div>
+                                </div>
+                                <div class="hotspot-impact">0.12 kg</div>
+                            </div>
+                            <div class="hotspot-item">
+                                <div class="hotspot-rank medium">3</div>
+                                <div class="hotspot-content">
+                                    <div class="hotspot-title">Cork Production</div>
+                                    <div class="hotspot-detail">Portugal supplier • Agricultural emissions</div>
+                                </div>
+                                <div class="hotspot-impact">0.09 kg</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOM with Emission Factors -->
+                    <div class="bom-section">
+                        <div class="section-title">📋 Bill of Materials with Matched Emission Factors</div>
+                        <table class="bom-table">
+                            <thead>
+                                <tr>
+                                    <th>Component</th>
+                                    <th>Quantity</th>
+                                    <th>Supplier</th>
+                                    <th>EF Source</th>
+                                    <th>Emissions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Glass Bottle</td>
+                                    <td>450g</td>
+                                    <td>Verallia FR</td>
+                                    <td class="ef">ADEME 2023</td>
+                                    <td class="emission">0.28 kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Cork Stopper</td>
+                                    <td>4.5g</td>
+                                    <td>Amorim PT</td>
+                                    <td class="ef">Ecoinvent 3.9</td>
+                                    <td class="emission">0.09 kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Label (Paper)</td>
+                                    <td>2.1g</td>
+                                    <td>Avery DE</td>
+                                    <td class="ef">GaBi 2024</td>
+                                    <td class="emission">0.02 kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Capsule (Aluminum)</td>
+                                    <td>1.8g</td>
+                                    <td>Amcor UK</td>
+                                    <td class="ef">DEFRA 2024</td>
+                                    <td class="emission">0.04 kg</td>
+                                </tr>
+                                <tr>
+                                    <td>Cardboard Box (1/6)</td>
+                                    <td>85g</td>
+                                    <td>DS Smith FR</td>
+                                    <td class="ef">ADEME 2023</td>
+                                    <td class="emission">0.05 kg</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button class="btn btn-primary btn-full" onclick="calculateFootprint()">
+                        <span>🔍</span> Calculate Product Footprint
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Total Footprint -->
+                <div class="footprint-card">
+                    <div class="footprint-value" id="totalFootprint">0.82</div>
+                    <div class="footprint-unit">kg CO₂e / unit</div>
+                    <div class="footprint-label">Total Product Carbon Footprint</div>
+                    <div class="footprint-benchmark">📉 18% below industry average (1.0 kg)</div>
+                </div>
+
+                <!-- Emission Factor Matching -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">🤖 AI EF Matching</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="supplier-section">
+                            <div class="supplier-item">
+                                <div class="supplier-icon">🏭</div>
+                                <div class="supplier-info">
+                                    <div class="supplier-name">Glass, container, green</div>
+                                    <div class="supplier-match">ADEME Base Carbone → matched</div>
+                                </div>
+                                <div class="supplier-conf">98.2%</div>
+                            </div>
+                            <div class="supplier-item">
+                                <div class="supplier-icon">🌳</div>
+                                <div class="supplier-info">
+                                    <div class="supplier-name">Cork, natural, stopper</div>
+                                    <div class="supplier-match">Ecoinvent 3.9 → matched</div>
+                                </div>
+                                <div class="supplier-conf">94.7%</div>
+                            </div>
+                            <div class="supplier-item">
+                                <div class="supplier-icon">📦</div>
+                                <div class="supplier-info">
+                                    <div class="supplier-name">Corrugated board, recycled</div>
+                                    <div class="supplier-match">GaBi database → matched</div>
+                                </div>
+                                <div class="supplier-conf">96.1%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reduction Recommendations -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">💡 Reduction Opportunities</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="recommendation-list">
+                            <div class="rec-item">
+                                <div class="rec-header">
+                                    <span class="rec-title">Switch to Recycled Glass</span>
+                                    <span class="rec-savings">-35%</span>
+                                </div>
+                                <div class="rec-detail">80% cullet content reduces furnace energy by 2.5%/10%</div>
+                            </div>
+                            <div class="rec-item">
+                                <div class="rec-header">
+                                    <span class="rec-title">Local Sourcing (France)</span>
+                                    <span class="rec-savings">-12%</span>
+                                </div>
+                                <div class="rec-detail">Reduce transport from 18,500km to 450km</div>
+                            </div>
+                            <div class="rec-item">
+                                <div class="rec-header">
+                                    <span class="rec-title">Lightweight Bottle Design</span>
+                                    <span class="rec-savings">-8%</span>
+                                </div>
+                                <div class="rec-detail">Reduce glass weight 450g → 380g</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processing Log -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">📜 Calculation Log</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="log-panel" id="logPanel">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">⚡ Export & Actions</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="exportPDF()">
+                                <span>📄</span> Export PDF
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportCSV()">
+                                <span>📊</span> Export CSV
+                            </button>
+                            <button class="btn btn-secondary" onclick="shareSupplier()">
+                                <span>🔗</span> Share with Supplier
+                            </button>
+                            <button class="btn btn-secondary" onclick="compareBenchmark()">
+                                <span>📈</span> Benchmark
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function init() {
+            addLogEntry('System initialized', 'success');
+            addLogEntry('Loaded 110,847 emission factors', 'info');
+            addLogEntry('Product selected: Wine Bottle (750ml)', 'info');
+            addLogEntry('RAG matching engine ready', 'success');
+        }
+
+        function selectProduct(type) {
+            document.querySelectorAll('.product-card').forEach(c => c.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            addLogEntry(`Product changed: ${type}`, 'info');
+        }
+
+        function calculateFootprint() {
+            addLogEntry('Starting footprint calculation...', 'info');
+            
+            setTimeout(() => addLogEntry('Parsing BOM data (5 components)...', 'info'), 300);
+            setTimeout(() => addLogEntry('RAG: Matching "Glass, container, green" → ADEME (98.2%)', 'success'), 800);
+            setTimeout(() => addLogEntry('RAG: Matching "Cork, natural, stopper" → Ecoinvent (94.7%)', 'success'), 1200);
+            setTimeout(() => addLogEntry('RAG: Matching "Corrugated board" → GaBi (96.1%)', 'success'), 1600);
+            setTimeout(() => addLogEntry('Calculating Scope 1, 2, 3 emissions...', 'info'), 2000);
+            setTimeout(() => addLogEntry('Identifying hotspots...', 'info'), 2400);
+            setTimeout(() => addLogEntry('Generating reduction recommendations...', 'info'), 2800);
+            setTimeout(() => addLogEntry('Calculation complete: 0.82 kg CO₂e/unit', 'success'), 3200);
+        }
+
+        function addLogEntry(message, type = 'info') {
+            const log = document.getElementById('logPanel');
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span class="log-message ${type}">${message}</span>
+            `;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function exportPDF() {
+            addLogEntry('Generating PDF report...', 'info');
+            setTimeout(() => addLogEntry('PDF exported: wine_bottle_pcf_report.pdf', 'success'), 1000);
+        }
+
+        function exportCSV() {
+            addLogEntry('Exporting to CSV...', 'info');
+            setTimeout(() => addLogEntry('CSV exported: emissions_breakdown.csv', 'success'), 500);
+        }
+
+        function shareSupplier() {
+            addLogEntry('Generating supplier data request...', 'info');
+            setTimeout(() => addLogEntry('CDP data request sent to 4 suppliers', 'success'), 800);
+        }
+
+        function compareBenchmark() {
+            addLogEntry('Loading industry benchmarks...', 'info');
+            setTimeout(() => addLogEntry('Compared against 847 similar products', 'success'), 1000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
